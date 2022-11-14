@@ -14,6 +14,7 @@ const AvailableOption = ({ appOption, setTreatmentName }) => {
         </p>
         <div className="card-actions">
           <label
+            disabled={slots.length === 0}
             htmlFor="BookingModal"
             onClick={() => setTreatmentName(appOption)}
             className="btn btn-primary bg-gradient-to-r from-primary to-secondary text-white"
