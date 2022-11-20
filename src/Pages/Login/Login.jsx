@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { UserContext } from "../../Context/AuthProvider";
+import useToken from "../../hooks/useToken";
 
 const Login = () => {
+  const { userLogin, LoginGoogle } = useContext(UserContext);
+  const [loginUserEmail, setLoginUserEmail] = useState('')
+  const [token] = useToken(loginUserEmail)
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const from = location.state?.from?.pathname || "/";
+
+  if (token) {
+    navigate(from, { replace: true });
+  }
+
   const {
     register,
     handleSubmit,
@@ -10,7 +25,32 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const handleLogin = (data) => console.log(data);
+  const handleLogin = (data) => {
+    userLogin(data.email, data.password)
+      .then((result) => {
+        const user = result.user;
+        setLoginUserEmail(data.email)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  // google login
+  const handleGoogleLogin = () => {
+    LoginGoogle()
+      .then((result) => {
+        const user = result.user;
+
+        navigate(from, { replace: true });
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+      });
+  };
 
   return (
     <div className="h-[800px] flex justify-center items-center">
@@ -65,12 +105,16 @@ const Login = () => {
         </form>
         <p>
           New to Doctors Portal?
-          <Link className="text-secondary">Create new account</Link>
+          <Link to={"/signup"} className="text-secondary">
+            Create new account
+          </Link>
         </p>
 
         <div className="divider">OR</div>
 
-        <button className="btn btn-outline w-full">CONTINUE WITH GOOGLE</button>
+        <button onClick={handleGoogleLogin} className="btn btn-outline w-full">
+          CONTINUE WITH GOOGLE
+        </button>
       </div>
     </div>
   );
