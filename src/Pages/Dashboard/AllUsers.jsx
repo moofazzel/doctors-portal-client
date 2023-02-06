@@ -12,7 +12,7 @@ const AllUsers = () => {
   });
 
   const handleMakeAdmin = (_id) => {
-    console.log(_id);
+
     fetch(`http://localhost:5000/users/admin/${_id}`, {
       method: "PUT",
       headers: {

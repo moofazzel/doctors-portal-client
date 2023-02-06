@@ -6,17 +6,19 @@ import useToken from "../../hooks/useToken";
 
 const Login = () => {
   const { userLogin, LoginGoogle } = useContext(UserContext);
-  const [loginUserEmail, setLoginUserEmail] = useState('')
-  const [token] = useToken(loginUserEmail)
+  const [loginUserEmail, setLoginUserEmail] = useState("");
+  const [token] = useToken(loginUserEmail);
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const from = location.state?.from?.pathname || "/";
 
-  if (token) {
-    navigate(from, { replace: true });
-  }
+  console.log(from);
+
+  // if (token) {
+  //   navigate(from, { replace: true });
+  // }
 
   const {
     register,
@@ -29,7 +31,8 @@ const Login = () => {
     userLogin(data.email, data.password)
       .then((result) => {
         const user = result.user;
-        setLoginUserEmail(data.email)
+        setLoginUserEmail(data.email);
+        return navigate(from, { replace: true });
       })
       .catch((error) => {
         console.error(error);
@@ -41,7 +44,8 @@ const Login = () => {
     LoginGoogle()
       .then((result) => {
         const user = result.user;
-
+        const accountType = "buyer";
+        saveUser(user.displayName, accountType, user.photoUrl);
         navigate(from, { replace: true });
       })
       .catch((error) => {
@@ -49,6 +53,24 @@ const Login = () => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorCode, errorMessage);
+      });
+  };
+
+  // save user info mongo DB
+  const saveUser = (name, email, accountType, img) => {
+    const user = { name, email, accountType: accountType, user_img: img };
+    fetch("https://used-procuct.vercel.app/users", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(user),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // set email for custom hook useToken for check token
+        // console.log("saveUser data", data);
+        navigate(from, { replace: true });
       });
   };
 
